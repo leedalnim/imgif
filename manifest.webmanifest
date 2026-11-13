@@ -1,0 +1,17 @@
+{
+  "name": "움짤공방",
+  "short_name": "움짤공방",
+  "description": "동영상·사진·GIF로 움짤을 만드는 개인용 웹앱",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121011",
+  "theme_color": "#121011",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
