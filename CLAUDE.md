@@ -51,5 +51,5 @@ Live Photo 읽기(웹에서 불가), GIF 검색(GIPHY API 키 필요), AI 배경
 
 ## 배포·업데이트
 - GitHub 무료 플랜은 **공개 저장소**에서만 Pages 사용 가능. Settings → Pages → Deploy from a branch → `main` / `(root)`.
-- `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 캐시 문제가 생기면 `CACHE = 'umjjal-v1'`의 숫자를 올릴 것.
+- `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 캐시 문제가 생기면 `CACHE = 'umjjal-v2'`의 숫자를 올릴 것.
 - 로컬 확인: `python3 -m http.server 8000` 후 `http://localhost:8000` (file://로 열면 ES 모듈이 막힘).

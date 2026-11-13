@@ -1,5 +1,5 @@
 // 움짤공방 오프라인 캐시: 앱 파일은 네트워크 우선(업데이트 반영), 끊기면 캐시로.
-const CACHE = 'umjjal-v1';
+const CACHE = 'umjjal-v2';
 const ASSETS = [
   './', './index.html', './app.js', './lib/gifenc.js', './lib/gifuct.js',
   './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
