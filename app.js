@@ -1252,9 +1252,10 @@ function showResult({ blob, W, H, ext }) {
       });
       hint = ext === 'gif' ? 'iPhone은 공유 메뉴에서 ‘이미지 저장’을 누르면 사진 앱에 움직이는 그대로 저장돼요.' : '공유 메뉴에서 ‘동영상 저장’을 누르면 사진 앱에 들어가요.';
     } else hint = '이미지를 길게 눌러서 저장할 수도 있어요.';
-    btn('파일로 받기', 'i-download', canShare ? '' : 'accent', () => {
+    const fileBtn = btn('파일로 받기', 'i-download', canShare ? '' : 'accent', () => {
       const a = document.createElement('a'); a.href = result.url; a.download = result.name; document.body.appendChild(a); a.click(); a.remove();
     });
+    acts.prepend(fileBtn); // 왼쪽: 파일로 받기, 오른쪽: 사진(갤러리)에 저장
   }
   $('#resHint').textContent = hint;
   $('#resultSheet').hidden = false;
@@ -1310,7 +1311,7 @@ $('#tryDemo').addEventListener('click', async () => {
 
 /* ---------- 시작 ---------- */
 // 고칠 때마다 숫자를 올리고 sw.js의 CACHE도 같은 숫자로. 홈 화면 맨 아래에 보임.
-const APP_VERSION = { n: 5, date: '2026-11-13' };
+const APP_VERSION = { n: 6, date: '2026-11-13' };
 {
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   const bar = document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]')?.content;
