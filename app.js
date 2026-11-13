@@ -1,6 +1,7 @@
 // 움짤공방 — 모든 처리는 브라우저 안에서 합니다.
 import { GIFEncoder, quantize, applyPalette } from './lib/gifenc.js';
 import { parseGIF, decompressFrames } from './lib/gifuct.js';
+import { setupCamera } from './camera.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1100,6 +1101,23 @@ inputs.camera.addEventListener('change', async (e) => {
   await importPhotos([f], { quiet: true });
   if (S.frames.length) { if (S.tab !== 'frames') setTab('frames'); toast(`${S.frames.length}번째 장을 찍었어요 · ‘찍어서 추가’로 계속`); }
 });
+
+/* ---------- 무음 카메라 연결 (camera.js) ---------- */
+const camera = setupCamera({
+  toast,
+  importPhotos: (files) => importPhotos(files),
+  // 스톱모션 이어 찍기: 편집기의 마지막 프레임을 겹쳐 보여줌
+  lastFrame: () => { const f = S.frames[S.frames.length - 1]; return f ? { src: f.bmp, w: f.w, h: f.h } : null; },
+  // 카메라 API가 없는 브라우저의 스톱모션은 예전처럼 기본 카메라(파일 입력)로
+  fallback: () => pick('camera'),
+  onOpen: () => { stopDemo(); if (!$('#editor').hidden) setPlaying(false); },
+  onClose: () => { if (!$('#home').hidden) startDemo(); },
+});
+// data-cam: free(무음 카메라) / stopmo(한 장씩 찍기) / stopmo-add(편집 중 찍어서 추가)
+$$('[data-cam]').forEach((b) => b.addEventListener('click', () => {
+  const k = b.dataset.cam;
+  camera.open({ stopmo: k !== 'free', continueFromEditor: k === 'stopmo-add' });
+}));
 // 데스크톱: 끌어다 놓기
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => {
@@ -1311,7 +1329,7 @@ $('#tryDemo').addEventListener('click', async () => {
 
 /* ---------- 시작 ---------- */
 // 고칠 때마다 숫자를 올리고 sw.js의 CACHE도 같은 숫자로. 홈 화면 맨 아래에 보임.
-const APP_VERSION = { n: 6, date: '2026-11-13' };
+const APP_VERSION = { n: 7, date: '2026-11-13' };
 {
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
   const bar = document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]')?.content;
@@ -1322,4 +1340,4 @@ startDemo();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
-window.__umjjal = { get state() { return S; }, out }; // 디버그용
+window.__umjjal = { get state() { return S; }, out, camera }; // 디버그용

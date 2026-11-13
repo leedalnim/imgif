@@ -13,7 +13,8 @@
 | 파일 | 역할 |
 |---|---|
 | `index.html` | 마크업 + 전체 CSS(:root 토큰) + SVG 아이콘 스프라이트 |
-| `app.js` | 모든 로직 (약 1,300줄, 섹션 주석으로 구분) |
+| `app.js` | 편집기 로직 (약 1,350줄, 섹션 주석으로 구분) |
+| `camera.js` | 무음 카메라 (getUserMedia, 약 450줄). `setupCamera(hooks)` 하나만 export |
 | `lib/gifenc.js` | GIF 인코더 gifenc 1.0.3 (MIT, 원본 ESM 그대로) |
 | `lib/gifuct.js` | GIF 디코더 gifuct-js 2.1.2를 esbuild로 ESM 번들 (MIT) |
 | `manifest.webmanifest`, `sw.js`, `icons/` | 홈 화면 추가(PWA)·오프라인 캐시 |
@@ -29,6 +30,17 @@
 - **저장**: GIF는 gifenc로 프레임마다 팔레트 양자화(메인 스레드, 프레임마다 `sleep(0)`으로 진행률 갱신). 동영상은 숨긴 `#recCanvas`의 `captureStream` + `MediaRecorder`로 실시간 녹화(MP4 우선, 안 되면 WebM).
 - **파일 내보내기 순서**: Claude 아티팩트 안이면 `window.claude.use('downloads')`(claude.ai 미리보기 전용, GitHub에선 자동으로 건너뜀) → 아니면 `navigator.share({files})`(아이폰 '이미지 저장'용) → `<a download>`.
 - 디버그용으로 `window.__umjjal`에 상태가 노출돼 있음.
+
+## 무음 카메라 (`camera.js`)
+- **연결**: app.js가 `setupCamera({ toast, importPhotos, lastFrame, fallback, onOpen, onClose })`로 만들고 `camera.open({ stopmo, continueFromEditor })`로 연다. camera.js는 app.js를 import하지 않음(순환 방지). 마크업·CSS는 index.html의 `#cam`, `.cam-*`, `.gal-*`.
+- **진입 버튼** `data-cam`: `free`(홈 '무음 카메라') / `stopmo`(홈 '한 장씩 찍기') / `stopmo-add`(편집기 '찍어서 추가', 편집기 마지막 프레임을 겹쳐 보여줌). 카메라 API가 없으면 스톱모션은 예전 `#fileCamera`(기본 카메라)로 대체.
+- **스트림**: 열 때만 권한 요청, 닫거나 앱이 뒤로 가면(visibilitychange) 트랙 정지, 돌아오면 다시 연결. 제약은 ideal로만: `facingMode`, `width 4096`/`height 3072`, 그 뒤 `getCapabilities()`의 최대값으로 한 번 더 `applyConstraints`. 실제 해상도는 `getSettings()`로 오른쪽 아래(`#camRes`)에 `카메라 → 저장 크기`로 표시.
+- **사진**: 화면의 촬영 상자(`#camBox`) 비율대로 video 프레임 가운데를 잘라 canvas에 그린 뒤 `toBlob('image/jpeg', 0.92)`. 비율은 4:3/1:1/16:9, 휴대폰을 세우면 세로(3:4 등). 1600만 화소 넘으면 줄임(iOS 캔버스 한도). 셀카 반전 저장은 `P.mirror`(미리보기는 전면이면 항상 거울상).
+- **동영상**: 카메라 스트림을 그대로 `MediaRecorder`로 녹화(MP4 우선). 동영상 모드에선 비율 선택이 숨고 화면이 카메라 원래 비율로 바뀜(보이는 그대로 녹화). 마이크는 켠 경우에만 녹화 시작 때 따로 요청. 셀카 반전·비율 자르기는 동영상엔 적용 안 됨.
+- **기타**: 타이머 0/3/5/10초(카운트다운 중 셔터 = 취소), 그리드, 손전등은 `getCapabilities().torch`가 있을 때만 버튼 보임, 카메라가 하나면 전환 버튼 숨김. 피드백은 흰 깜빡임 + `navigator.vibrate`(아이폰은 진동 안 됨). 설정은 localStorage `umjjal-camera`.
+- **갤러리**: 찍은 건 메모리에만(`shots`, 앱 닫으면 사라짐). 여러 장 골라 저장 = `navigator.share({files})` → 안 되면 하나씩 `<a download>`. '움짤로' = 고른 사진만 `importPhotos` → `addFrames`.
+- **스톱모션**: 직전 사진을 `#camGhost` 캔버스에 40% 투명도로 겹침. '완료 (N)'에서 이번에 찍은 사진만 편집기로.
+- **확인한 것** (데스크톱 Chrome `--use-fake-device-for-media-stream`): 3840×2160 스트림, 사진 3비율·타이머·그리드, MP4 녹화(마이크 트랙 켜기/끄기), 공유/다운로드 저장, 삭제, 움짤로 보내기, 스톱모션 겹쳐 보기·이어 찍기, 닫으면 트랙 ended, 권한 거부·카메라 없음 안내, 콘솔 오류 없음. **아이폰 실기기는 아직**(전면 카메라 반전, 손전등, 실제 해상도, 녹화 형식).
 
 ## 디자인
 암실(darkroom) 콘셉트, 다크 단일 테마. 토큰은 `index.html` 맨 위 `:root`.
@@ -53,5 +65,5 @@ Live Photo 읽기(웹에서 불가), GIF 검색(GIPHY API 키 필요), AI 배경
 ## 배포·업데이트
 - GitHub 무료 플랜은 **공개 저장소**에서만 Pages 사용 가능. Settings → Pages → Deploy from a branch → `main` / `(root)`.
 - `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 서비스워커는 `cache: 'no-cache'`로 받아서 GitHub Pages의 10분 HTTP 캐시도 건너뜀.
-- **버전**: 고칠 때마다 `app.js`의 `APP_VERSION.n`과 `sw.js`의 `CACHE = 'umjjal-vN'`을 같이 올릴 것 (지금 6). 홈 화면 맨 아래에 'v6 · 날짜 · 홈 화면 앱/브라우저 · 상태바 스타일'로 보여서 폰에 새 버전이 들어왔는지 확인 가능.
+- **버전**: 고칠 때마다 `app.js`의 `APP_VERSION.n`과 `sw.js`의 `CACHE = 'umjjal-vN'`을 같이 올릴 것 (지금 7). 홈 화면 맨 아래에 'v7 · 날짜 · 홈 화면 앱/브라우저 · 상태바 스타일'로 보여서 폰에 새 버전이 들어왔는지 확인 가능.
 - 로컬 확인: `python3 -m http.server 8000` 후 `http://localhost:8000` (file://로 열면 ES 모듈이 막힘).

@@ -1,8 +1,8 @@
 // 움짤공방 오프라인 캐시: 앱 파일은 네트워크 우선(업데이트 반영), 끊기면 캐시로.
 // APP_VERSION(app.js)과 같은 숫자로 맞출 것
-const CACHE = 'umjjal-v6';
+const CACHE = 'umjjal-v7';
 const ASSETS = [
-  './', './index.html', './app.js', './lib/gifenc.js', './lib/gifuct.js',
+  './', './index.html', './app.js', './camera.js', './lib/gifenc.js', './lib/gifuct.js',
   './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
 ];
 self.addEventListener('install', (e) => {
