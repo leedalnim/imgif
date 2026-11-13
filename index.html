@@ -221,6 +221,11 @@ html.editing #app { height: 100%; }
 .row.scroll { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
 .row.scroll::-webkit-scrollbar { display: none; }
 .label { font-size: 12px; color: var(--muted); font-weight: 500; min-width: 52px; }
+/* 프레임 탭: 선택한 프레임 편집 / 새 프레임 더하기 구분 */
+.tool-head { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: -6px; }
+.add-head { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 4px; }
+.add-tools .chip { border-style: dashed; background: transparent; }
+.add-tools .chip .ico { color: var(--accent); }
 .chip {
   min-height: 34px; padding: 0 12px; border-radius: 999px;
   border: 1px solid var(--line); background: transparent; font-size: 13px; font-weight: 500;
@@ -442,6 +447,7 @@ textarea {
       <!-- 프레임 -->
       <div class="pane" data-pane="frames">
         <div class="strip" id="strip" role="listbox" aria-label="프레임 목록"></div>
+        <div class="tool-head">선택한 프레임</div>
         <div class="tools">
           <button class="chip" id="frToggle"><svg class="ico"><use href="#i-eye"/></svg><span>빼기</span></button>
           <button class="chip" id="frLeft" aria-label="앞으로 옮기기"><svg class="ico"><use href="#i-back"/></svg></button>
@@ -449,7 +455,8 @@ textarea {
           <button class="chip" id="frDup"><svg class="ico"><use href="#i-copy"/></svg>복제</button>
           <button class="chip" id="frDel"><svg class="ico"><use href="#i-trash"/></svg>삭제</button>
         </div>
-        <div class="tools">
+        <div class="tool-head add-head">프레임 더하기</div>
+        <div class="tools add-tools">
           <button class="chip" data-add="video"><svg class="ico"><use href="#i-video"/></svg>동영상 추가</button>
           <button class="chip" data-add="photos"><svg class="ico"><use href="#i-photo"/></svg>사진 추가</button>
           <button class="chip" data-add="gif"><svg class="ico"><use href="#i-loop"/></svg>GIF 추가</button>
