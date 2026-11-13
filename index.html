@@ -76,7 +76,7 @@ button { cursor: pointer; }
   padding: calc(var(--sat) + 28px) 18px calc(var(--sab) + 28px);
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 20px;
 }
 .brand { display: flex; flex-direction: column; gap: 6px; }
 .brand-eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; color: var(--muted); }
@@ -84,7 +84,7 @@ button { cursor: pointer; }
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(46px, 14vw, 64px);
+  font-size: clamp(42px, 12vw, 56px);
   line-height: .95;
   letter-spacing: -0.02em;
   text-wrap: balance;
@@ -95,10 +95,11 @@ button { cursor: pointer; }
 .reel {
   background: var(--film);
   border-radius: 6px;
-  padding: 22px 14px;
+  padding: 20px 14px;
   display: grid;
-  gap: 12px;
-  justify-items: center;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
   background-image:
     linear-gradient(90deg, var(--bg) 0 9px, transparent 9px),
     linear-gradient(90deg, var(--bg) 0 9px, transparent 9px);
@@ -106,8 +107,8 @@ button { cursor: pointer; }
   background-repeat: repeat-x;
   background-position: 4px 8px, 4px calc(100% - 8px);
 }
-.reel canvas { width: min(100%, 300px); aspect-ratio: 1; border-radius: 3px; display: block; }
-.reel-meta { display: flex; justify-content: space-between; width: min(100%, 300px); font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.reel canvas { width: clamp(96px, 30vw, 132px); aspect-ratio: 1; border-radius: 3px; display: block; }
+.reel-meta { display: grid; gap: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .reel-meta b { color: var(--accent); font-weight: 500; }
 
 .starts { display: grid; gap: 10px; }
@@ -224,6 +225,11 @@ button { cursor: pointer; }
 input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
 .big-read { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
 .big-read b { color: var(--text); font-size: 22px; font-weight: 500; margin-right: 2px; }
+.big-read b { margin-right: 8px; color: var(--accent); }
+#spdName { font-family: var(--font-body); color: var(--text); font-size: 14px; font-weight: 600; }
+.spd-track { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+.spd-end { display: grid; justify-items: center; font-size: 11px; color: var(--muted); line-height: 1.2; min-width: 40px; }
+.spd-end i { font-style: normal; font-size: 26px; line-height: 1.1; }
 .swatches { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 2px; }
 .sw { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); }
 .sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
@@ -471,8 +477,12 @@ textarea {
 
       <!-- 속도 -->
       <div class="pane" data-pane="speed" hidden>
-        <div class="big-read"><b id="spdRead">0.10</b>초/프레임 · 총 <span id="spdTotal">0.0</span>초</div>
-        <input type="range" id="spd" min="0" max="1000" step="1" aria-label="프레임 간격">
+        <div class="big-read"><b id="spdMul">×1.0</b><span id="spdName">원래 속도</span><br><span id="spdRead">0.10</span>초/프레임 · 총 <span id="spdTotal">0.0</span>초</div>
+        <div class="spd-track">
+          <span class="spd-end" aria-hidden="true"><i>🐢</i>느리게</span>
+          <input type="range" id="spd" min="0" max="1000" step="1" aria-label="움짤 속도 (오른쪽이 빠르게)">
+          <span class="spd-end" aria-hidden="true"><i>🐇</i>빠르게</span>
+        </div>
         <div class="row">
           <button class="chip" data-speed="2">느리게 ×½</button>
           <button class="chip" data-speed="1">원래 속도</button>

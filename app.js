@@ -551,10 +551,21 @@ $('#frDel').addEventListener('click', () => {
 
 /* ---------- 속도 탭 ---------- */
 const spd = $('#spd');
-const delayToV = (d) => Math.round((1000 * Math.log(d / 0.02)) / Math.log(100));
-const vToDelay = (v) => 0.02 * Math.pow(100, v / 1000);
+// 슬라이더는 오른쪽(🐇)으로 갈수록 빠르게: 값이 클수록 프레임 간격이 짧아짐 (2초 ~ 0.02초, 로그 눈금)
+const delayToV = (d) => 1000 - Math.round((1000 * Math.log(d / 0.02)) / Math.log(100));
+const vToDelay = (v) => 0.02 * Math.pow(100, (1000 - v) / 1000);
+function speedName(m) {
+  if (Math.abs(m - 1) < 0.05) return '원래 속도';
+  if (m >= 3) return '아주 빠르게';
+  if (m > 1) return '빠르게';
+  if (m <= 1 / 3) return '아주 느리게';
+  return '느리게';
+}
 function syncSpeedPane() {
   spd.value = delayToV(S.delay);
+  const mul = (S.baseDelay || S.delay) / S.delay;
+  $('#spdMul').textContent = '×' + (mul >= 10 ? mul.toFixed(0) : mul < 1 ? mul.toFixed(2).replace(/0$/, '') : mul.toFixed(1));
+  $('#spdName').textContent = speedName(mul);
   $('#spdRead').textContent = S.delay.toFixed(2);
   $('#spdTotal').textContent = (getSeq().length * S.delay).toFixed(1);
   $$('#dirSeg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.dir === S.dir)));
