@@ -432,6 +432,7 @@ html.cam-open #root, html.cam-open .topbar { visibility: hidden; }
 .gal-item[aria-pressed="true"] img { transform: scale(.9); border-radius: 6px; }
 .gal-item .dur { position: absolute; left: 6px; bottom: 5px; display: flex; align-items: center; gap: 2px; font: 500 11px var(--font-mono); color: #fff; text-shadow: 0 1px 3px #000; }
 .gal-item .dur .ico { width: 12px; height: 12px; }
+.gal-item .saved { position: absolute; right: 5px; bottom: 5px; font-size: 10px; font-weight: 600; color: var(--accent-ink); background: var(--ok); padding: 1px 6px; border-radius: 999px; }
 .gal-item .chk { position: absolute; right: 6px; top: 6px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; background: rgba(0,0,0,.3); display: grid; place-items: center; }
 .gal-item .chk .ico { width: 14px; height: 14px; stroke-width: 3; opacity: 0; color: var(--accent-ink); }
 .gal-item[aria-pressed="true"] .chk { background: var(--accent); border-color: var(--accent); }
@@ -439,6 +440,8 @@ html.cam-open #root, html.cam-open .topbar { visibility: hidden; }
 .cam-gal-act { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; padding: 10px 12px max(12px, calc(var(--sab) - 6px)); border-top: 1px solid var(--line); }
 .cam-gal-act .btn { min-height: 46px; }
 .btn:disabled { opacity: .4; }
+/* 카메라 화면에선 안내 문구를 아래쪽(셔터·저장 버튼 위)에 */
+html.cam-open .toast { top: auto; bottom: calc(max(12px, var(--sab) - 6px) + 84px); }
 
 @media (prefers-reduced-motion: reduce) { .sheet { animation: none; } * { transition: none !important; } }
 @media (min-height: 860px) { .panel { height: 260px; } }

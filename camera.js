@@ -311,7 +311,7 @@ export function setupCamera(hooks) {
       b.className = 'gal-item'; b.type = 'button';
       b.setAttribute('aria-pressed', String(selected.has(s.id)));
       b.setAttribute('aria-label', `${s.kind === 'video' ? '동영상' : '사진'} ${s.w}×${s.h}`);
-      b.innerHTML = `<img alt="" src="${s.thumb}">${s.kind === 'video' ? `<span class="dur"><svg class="ico fill"><use href="#i-play"/></svg>${fmtDur(s.dur)}</span>` : ''}<span class="chk"><svg class="ico"><use href="#i-check"/></svg></span>`;
+      b.innerHTML = `<img alt="" src="${s.thumb}">${s.kind === 'video' ? `<span class="dur"><svg class="ico fill"><use href="#i-play"/></svg>${fmtDur(s.dur)}</span>` : ''}<span class="chk"><svg class="ico"><use href="#i-check"/></svg></span>${s.saved ? '<span class="saved">저장됨</span>' : ''}`;
       b.addEventListener('click', () => { selected.has(s.id) ? selected.delete(s.id) : selected.add(s.id); b.setAttribute('aria-pressed', String(selected.has(s.id))); syncGalleryActions(); });
       g.appendChild(b);
     });
@@ -330,14 +330,30 @@ export function setupCamera(hooks) {
   }
   const chosen = () => shots.filter((s) => selected.has(s.id));
   const toFile = (s, i) => new File([s.blob], `umjjal-cam-${stamp(s.at)}-${i + 1}.${s.ext}`, { type: s.blob.type });
+  // '사진 2장 · 동영상 1개를'처럼 (조사까지)
+  function countLabel(list) {
+    const p = list.filter((s) => s.kind === 'photo').length, v = list.length - p;
+    const t = [p && `사진 ${p}장`, v && `동영상 ${v}개`].filter(Boolean).join(' · ');
+    return t + (v ? '를' : '을'); // ‘장을’ / ‘개를’
+  }
+  // 저장을 마친 것은 표시하고 선택을 풀어서, 아직 안 저장한 게 뭔지 보이게
+  function markSaved(list, msg) {
+    list.forEach((s) => { s.saved = true; });
+    selected.clear(); renderGallery();
+    hooks.toast(msg);
+  }
   async function saveSelected() {
-    const files = chosen().map(toFile);
+    const list = chosen();
+    const files = list.map(toFile);
     if (!files.length) return;
     let canShare = false;
     try { canShare = !!(navigator.canShare && navigator.canShare({ files })); } catch (e) { canShare = false; }
     if (canShare) {
-      try { await navigator.share({ files }); return; }
-      catch (e) { if (e && e.name === 'AbortError') return; /* 공유 실패 → 하나씩 받기 */ }
+      try {
+        await navigator.share({ files });
+        // 공유 메뉴에서 '이미지 저장' 등 어떤 동작을 끝까지 했을 때만 여기로 옴(취소하면 AbortError)
+        return markSaved(list, `${countLabel(list)} 저장했어요`);
+      } catch (e) { if (e && e.name === 'AbortError') return; /* 공유 실패 → 하나씩 받기 */ }
     }
     for (const f of files) {
       const u = URL.createObjectURL(f);
@@ -345,7 +361,7 @@ export function setupCamera(hooks) {
       setTimeout(() => URL.revokeObjectURL(u), 4000);
       await sleep(400);
     }
-    hooks.toast(`${files.length}개를 파일로 받았어요`);
+    markSaved(list, `${countLabel(list)} 파일로 받았어요`);
   }
   function deleteSelected() {
     for (let i = shots.length - 1; i >= 0; i--) {
