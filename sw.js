@@ -1,5 +1,6 @@
 // 움짤공방 오프라인 캐시: 앱 파일은 네트워크 우선(업데이트 반영), 끊기면 캐시로.
-const CACHE = 'umjjal-v3';
+// APP_VERSION(app.js)과 같은 숫자로 맞출 것
+const CACHE = 'umjjal-v4';
 const ASSETS = [
   './', './index.html', './app.js', './lib/gifenc.js', './lib/gifuct.js',
   './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
@@ -17,7 +18,8 @@ self.addEventListener('fetch', (e) => {
   const isFont = url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com';
   if (url.origin === self.location.origin) {
     e.respondWith(
-      fetch(req).then((res) => {
+      // HTTP 캐시(GitHub Pages는 10분)를 건너뛰고 서버에 새 버전이 있는지 매번 확인
+      fetch(req, { cache: 'no-cache' }).then((res) => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
         return res;
       }).catch(() => caches.match(req, { ignoreSearch: true }).then((r) => r || caches.match('./index.html')))

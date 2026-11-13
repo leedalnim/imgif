@@ -1309,6 +1309,13 @@ $('#tryDemo').addEventListener('click', async () => {
 });
 
 /* ---------- 시작 ---------- */
+// 고칠 때마다 숫자를 올리고 sw.js의 CACHE도 같은 숫자로. 홈 화면 맨 아래에 보임.
+const APP_VERSION = { n: 4, date: '2026-11-13' };
+{
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const bar = document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]')?.content;
+  $('#ver').textContent = `v${APP_VERSION.n} · ${APP_VERSION.date} · ${standalone ? '홈 화면 앱' : '브라우저'} · 상태바 ${bar}`;
+}
 buildFx(); buildEmoji();
 startDemo();
 if ('serviceWorker' in navigator && location.protocol === 'https:') {

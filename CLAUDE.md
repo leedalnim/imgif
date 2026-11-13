@@ -52,5 +52,6 @@ Live Photo 읽기(웹에서 불가), GIF 검색(GIPHY API 키 필요), AI 배경
 
 ## 배포·업데이트
 - GitHub 무료 플랜은 **공개 저장소**에서만 Pages 사용 가능. Settings → Pages → Deploy from a branch → `main` / `(root)`.
-- `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 캐시 문제가 생기면 `CACHE = 'umjjal-v3'`의 숫자를 올릴 것.
+- `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 서비스워커는 `cache: 'no-cache'`로 받아서 GitHub Pages의 10분 HTTP 캐시도 건너뜀.
+- **버전**: 고칠 때마다 `app.js`의 `APP_VERSION.n`과 `sw.js`의 `CACHE = 'umjjal-vN'`을 같이 올릴 것 (지금 4). 홈 화면 맨 아래에 'v4 · 날짜 · 홈 화면 앱/브라우저 · 상태바 스타일'로 보여서 폰에 새 버전이 들어왔는지 확인 가능.
 - 로컬 확인: `python3 -m http.server 8000` 후 `http://localhost:8000` (file://로 열면 ES 모듈이 막힘).
