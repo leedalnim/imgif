@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <title>움짤공방</title>
 <meta name="description" content="동영상·사진·GIF로 움짤을 만드는 개인용 웹앱. 모든 처리는 기기 안에서.">
 <meta name="theme-color" content="#121011">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="움짤공방">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
@@ -40,7 +40,15 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
+html, body { height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+html { background: var(--bg); }
+/* 상태바 뒤(0 ~ safe-area-inset-top)에는 아무것도 두지 않는다. 스크롤 영역(#root)은 상단 막대 아래에서 시작
+   → iOS 26 홈 화면 앱이 상단에 흐림을 그리지 않음 */
+#root {
+  position: fixed; top: calc(var(--sat) + var(--tbh, 0px)); left: 0; right: 0; bottom: 0;
+  overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none;
+}
+html.lock #root { overflow: hidden; } /* 아래에서 올라오는 창이 열렸을 때 뒤 화면 잠금 */
 body {
   background: var(--bg);
   color: var(--text);
@@ -60,7 +68,7 @@ button { cursor: pointer; }
 .ico.fill { fill: currentColor; stroke: none; }
 
 #app {
-  height: 100%;
+  min-height: 100%;
   max-width: 560px;
   margin: 0 auto;
   display: flex;
@@ -70,10 +78,10 @@ button { cursor: pointer; }
 }
 
 /* ---------- 홈 ---------- */
+html.editing #app { height: 100%; }
 #home {
   flex: 1;
-  overflow-y: auto;
-  padding: calc(var(--sat) + 28px) 18px calc(var(--sab) + 28px);
+  padding: 28px 18px calc(var(--sab) + 28px);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -141,11 +149,13 @@ button { cursor: pointer; }
 /* ---------- 에디터 ---------- */
 #editor { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .topbar {
+  position: fixed; top: var(--sat); left: 0; right: 0; z-index: 5;
+  max-width: 560px; margin: 0 auto; background: var(--bg);
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 8px;
-  padding: calc(var(--sat) + 8px) 12px 8px;
+  padding: 8px calc(var(--sar) + 12px) 8px calc(var(--sal) + 12px);
 }
 .topbar .info { text-align: center; font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn {
@@ -286,7 +296,7 @@ textarea {
 .tabs {
   display: flex; overflow-x: auto; scrollbar-width: none;
   background: var(--bg); border-top: 1px solid var(--line);
-  padding: 4px 4px calc(var(--sab) + 4px);
+  padding: 4px 4px max(0px, calc(var(--sab) - 14px));
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
@@ -299,9 +309,9 @@ textarea {
 .tab[aria-selected="true"] .ico { color: var(--accent); }
 
 /* ---------- 시트 ---------- */
-.sheet-wrap { position: fixed; inset: 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center; background: rgba(6,5,5,.6); }
+.sheet-wrap { position: fixed; inset: var(--sat) 0 0 0; z-index: 20; display: flex; align-items: flex-end; justify-content: center; background: rgba(6,5,5,.6); }
 .sheet {
-  width: 100%; max-width: 560px; max-height: calc(100% - var(--sat) - 20px);
+  width: 100%; max-width: 560px; max-height: calc(100% - 20px);
   overflow-y: auto; background: var(--surface); border-radius: 18px 18px 0 0;
   border-top: 1px solid var(--line);
   padding: 10px 18px calc(var(--sab) + 18px);
@@ -347,7 +357,7 @@ textarea {
   padding: 10px 16px; border-radius: 999px; box-shadow: 0 10px 30px rgba(0,0,0,.4);
   max-width: calc(100% - 32px); text-align: center;
 }
-.busy { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(6,5,5,.72); }
+.busy { position: fixed; inset: var(--sat) 0 0 0; z-index: 30; display: grid; place-items: center; background: rgba(6,5,5,.72); }
 .busy-card { width: min(320px, calc(100% - 40px)); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 12px; }
 .busy-card p { margin: 0; font-weight: 600; }
 .busy-card small { color: var(--muted); font-family: var(--font-mono); }
@@ -358,37 +368,13 @@ textarea {
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-frames" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 5v14M15 5v14"/></symbol>
-  <symbol id="i-speed" viewBox="0 0 24 24"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.2"/></symbol>
-  <symbol id="i-canvas" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></symbol>
-  <symbol id="i-filter" viewBox="0 0 24 24"><circle cx="9" cy="9" r="5.5"/><circle cx="15" cy="9" r="5.5"/><circle cx="12" cy="15" r="5.5"/></symbol>
-  <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 7V4h14v3"/><path d="M12 4v16"/><path d="M9 20h6"/></symbol>
-  <symbol id="i-sticker" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0"/><path d="M9 9.5v.5M15 9.5v.5"/></symbol>
-  <symbol id="i-draw" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></symbol>
-  <symbol id="i-border" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7.5" y="7.5" width="9" height="9" rx="1"/></symbol>
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></symbol>
-  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
-  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
-  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
-  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
-  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/></symbol>
-  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
-  <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
-  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
-  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></symbol>
-  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
-  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></symbol>
-  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7L3 17h5z"/><path d="M16 7l5 10h-5z"/></symbol>
-  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
-  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
-  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
-  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></symbol>
-  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/></symbol>
-  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
-</svg>
+<header class="topbar" hidden>
+  <button class="btn ghost" id="goHome" aria-label="처음으로"><svg class="ico"><use href="#i-back"/></svg>처음</button>
+  <div class="info" id="info">0프레임</div>
+  <button class="btn accent" id="openExport"><svg class="ico"><use href="#i-download"/></svg>저장</button>
+</header>
 
+<div id="root">
 <div id="app">
   <!-- 홈 -->
   <section id="home" aria-labelledby="brandTitle">
@@ -436,11 +422,6 @@ textarea {
 
   <!-- 에디터 -->
   <section id="editor" hidden>
-    <header class="topbar">
-      <button class="btn ghost" id="goHome" aria-label="처음으로"><svg class="ico"><use href="#i-back"/></svg>처음</button>
-      <div class="info" id="info">0프레임</div>
-      <button class="btn accent" id="openExport"><svg class="ico"><use href="#i-download"/></svg>저장</button>
-    </header>
 
     <div class="stage" id="stage">
       <div class="stage-inner" id="stageInner">
@@ -580,6 +561,37 @@ textarea {
     </nav>
   </section>
 </div>
+</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-frames" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 5v14M15 5v14"/></symbol>
+  <symbol id="i-speed" viewBox="0 0 24 24"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.2"/></symbol>
+  <symbol id="i-canvas" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M2 6h14a2 2 0 0 1 2 2v14"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24"><circle cx="9" cy="9" r="5.5"/><circle cx="15" cy="9" r="5.5"/><circle cx="12" cy="15" r="5.5"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M5 7V4h14v3"/><path d="M12 4v16"/><path d="M9 20h6"/></symbol>
+  <symbol id="i-sticker" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0"/><path d="M9 9.5v.5M15 9.5v.5"/></symbol>
+  <symbol id="i-draw" viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></symbol>
+  <symbol id="i-border" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7.5" y="7.5" width="9" height="9" rx="1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/></symbol>
+  <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
+  <symbol id="i-loop" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M8 7L3 17h5z"/><path d="M16 7l5 10h-5z"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12"/><path d="M7 11l5 5 5-5"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v13"/><path d="M8 7l4-4 4 4"/><path d="M5 12v8h14v-8"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
 
 <!-- 동영상 구간 선택 -->
 <div class="sheet-wrap" id="trimSheet" hidden>

@@ -35,6 +35,7 @@
 - 색: 바탕 `--bg #121011`, 강조 `--accent #ff5b3d` 하나만. 장식은 필름 스트립(스프로킷 구멍) 모티프만.
 - 글꼴: 제목 Black Han Sans, 본문 IBM Plex Sans KR, 숫자·타임코드 IBM Plex Mono (Google Fonts).
 - 모바일 우선, 최대 폭 560px. safe-area inset 처리돼 있음.
+- **화면 틀 (iOS 26 상단 흐림 방지)**: html/body는 스크롤 안 함. 편집 화면 상단 막대 `header.topbar`는 body 바로 아래, `position: fixed; top: safe-area-inset-top`. 스크롤 영역은 `#root`(fixed, top = inset + `--tbh`). 상태바 뒤에는 html 바탕색만 보이게 아무것도 두지 않음(시트·로딩 오버레이도 inset 아래부터). `--tbh`는 app.js가 ResizeObserver로 재고, 첫 화면에선 막대가 숨겨져 0. 스크롤은 `window`가 아니라 `scroller()`(= #root) 기준. 시트가 열리면 `html.lock`으로 뒤 화면 잠금. 상태바 스타일은 `default`.
 
 ## 확인된 것 (데스크톱 Chrome + Playwright 기준)
 - 예시 열기, 텍스트/필터/캔버스/그리기/테두리/부메랑 → GIF 저장(30프레임, 반복 정보 정상)
@@ -51,5 +52,5 @@ Live Photo 읽기(웹에서 불가), GIF 검색(GIPHY API 키 필요), AI 배경
 
 ## 배포·업데이트
 - GitHub 무료 플랜은 **공개 저장소**에서만 Pages 사용 가능. Settings → Pages → Deploy from a branch → `main` / `(root)`.
-- `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 캐시 문제가 생기면 `CACHE = 'umjjal-v2'`의 숫자를 올릴 것.
+- `sw.js`는 같은 출처 파일을 네트워크 우선으로 받아서 보통은 바로 반영됨. 캐시 문제가 생기면 `CACHE = 'umjjal-v3'`의 숫자를 올릴 것.
 - 로컬 확인: `python3 -m http.server 8000` 후 `http://localhost:8000` (file://로 열면 ES 모듈이 막힘).

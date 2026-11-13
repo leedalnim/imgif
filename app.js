@@ -805,9 +805,28 @@ function syncAll() {
   renderLayerPanels(); syncInfo();
 }
 
+/* ---------- 화면 틀: 고정 상단 막대 + 스크롤 영역(#root) ---------- */
+// 상단 막대 높이를 재서 --tbh에 넣는다. #root가 그 아래에서 시작해야 iOS가 상태바 쪽에 흐림을 그리지 않음.
+const topbar = $('.topbar');
+const scroller = () => document.getElementById('root');
+function setTopbarH() {
+  document.documentElement.style.setProperty('--tbh', Math.ceil(topbar.getBoundingClientRect().height) + 'px');
+}
+setTopbarH();
+if (window.ResizeObserver) new ResizeObserver(setTopbarH).observe(topbar); else addEventListener('resize', setTopbarH);
+// 아래에서 올라오는 창이 하나라도 열려 있으면 뒤 화면 스크롤 잠금
+const sheetWraps = $$('.sheet-wrap');
+const syncLock = () => document.documentElement.classList.toggle('lock', sheetWraps.some((w) => !w.hidden));
+new MutationObserver(syncLock).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['hidden'] });
+function showScreen(editing) {
+  $('#home').hidden = editing; $('#editor').hidden = !editing; topbar.hidden = !editing;
+  document.documentElement.classList.toggle('editing', editing);
+  setTopbarH(); scroller().scrollTo(0, 0);
+}
+
 /* ---------- 화면 전환 ---------- */
 function openEditor() {
-  $('#home').hidden = true; $('#editor').hidden = false;
+  showScreen(true);
   stopDemo();
   setTab(S.tab || 'frames');
   syncAll(); fitView(); setPlaying(true);
@@ -815,7 +834,7 @@ function openEditor() {
 function goHome() {
   S.frames.forEach(freeFrame);
   S = defaults();
-  $('#editor').hidden = true; $('#home').hidden = false;
+  showScreen(false);
   startDemo();
 }
 $('#goHome').addEventListener('click', () => { $('#confirmSheet').hidden = false; $('#cfNo').focus(); });
